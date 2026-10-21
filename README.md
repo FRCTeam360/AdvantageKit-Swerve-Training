@@ -4,6 +4,6 @@ This repository is for FRC Team 360's robot Rainmaker26/Rainmaker27 to add Maple
 
 How to build and run sim: 
 
-Step 1.) build
-Step 2.) run sim
+Step 1.) ask james
+Step 2.) pray
 by: owen kim
