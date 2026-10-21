@@ -14,17 +14,18 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.Roller;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -45,10 +46,9 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    Roller roller = new Roller();
     switch (Constants.currentMode) {
       case REAL:
-      
+
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
@@ -80,7 +80,7 @@ public class RobotContainer {
         break;
 
       case SIM:
-        // Sim robot, instantiate physics sim IO 
+        // Sim robot, instantiate physics sim IO
 
         drive =
             new Drive(
@@ -93,7 +93,7 @@ public class RobotContainer {
 
       default:
         // Replayed robot, disable IO implementations
-        
+
         drive =
             new Drive(
                 new GyroIO() {},
@@ -134,6 +134,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    Roller roller = new Roller();
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -166,16 +167,8 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     // does the roller roll and the roll of the and roller the rolling
-    controller
-    .y()
-    .onTrue(
-        roller.setDutyCycle(1.0)
-    );
-    controller
-    .y()
-    .onFalse(
-        roller.setDutyCycle(0.0)
-    );
+    controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
+    controller.y().onFalse(new InstantCommand(() -> roller.stop()));
   }
 
   /**
