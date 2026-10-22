@@ -7,12 +7,15 @@ How to build and run sim:
 Step 1.) ask james
 Step 2.) pray
 by: owen kim
-
-
-
-
-
-
-
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
 # do NOT delete this coconut or our entire code will break
 ![Do not delete this coconut or our entire code will break](coconut.jpg)
