@@ -19,12 +19,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.Launcher.Flywheel;
-import frc.robot.subsystems.Launcher.FlywheelIO;
-import frc.robot.subsystems.Launcher.FlywheelIOInputsAutoLogged;
+import frc.robot.subsystems.Launcher.FlywheelIOSim;
 import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
-import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
+import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -96,7 +94,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
-        
+
         flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
@@ -116,7 +114,7 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
                     VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
-        flywheel = new Flywheel(new FlywheelIOTalonFX());
+        flywheel = new Flywheel(new FlywheelIOSim());
         break;
 
       default:
@@ -200,6 +198,8 @@ public class RobotContainer {
     // does the roller roll and the roll of the and roller the rolling
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
+
+    controller.leftBumper().onTrue(flywheel.setDutyCycleCommand(() -> 1.0));
   }
 
   /**

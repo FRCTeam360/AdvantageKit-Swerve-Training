@@ -3,14 +3,16 @@ package frc.robot.subsystems.Launcher;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface FlywheelIO {
-    
-    @AutoLog
-    public static class FlywheelIOInputs {
-        double[] statorCurrentAmps = new double[2];
-        double[] velocityRPM = new double[2];
-    }
 
-    public void setDutyCycle(double doody);
+  @AutoLog
+  public static class FlywheelIOInputs {
+    double[] statorCurrentAmps = new double[2];
+    double[] velocityRPM = new double[2];
+    double[] velocities = new double[2];
+    double[] voltages = new double[2];
+  }
 
-    public default void updateInputs(FlywheelIOInputs inputs) {}
+  public void setDutyCycle(double doody);
+
+  public default void updateInputs(FlywheelIOInputs inputs) {}
 }
