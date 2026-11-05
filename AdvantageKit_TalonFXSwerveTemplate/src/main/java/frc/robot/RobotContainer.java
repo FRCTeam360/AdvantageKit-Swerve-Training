@@ -21,6 +21,10 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.Launcher.Flywheel;
+import frc.robot.subsystems.Launcher.FlywheelIO;
+import frc.robot.subsystems.Launcher.FlywheelIOInputsAutoLogged;
+import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
+import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -93,7 +97,7 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
         
-        // flywheel = new Flywheel(new FlywheelIOTalonFX);
+        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
       case SIM:
@@ -126,6 +130,7 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
+        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
     }
 
