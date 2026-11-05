@@ -127,8 +127,8 @@ public class FlywheelIOSim implements FlywheelIO {
     // Mirror readings to both slots since we model both motors as one.
     double statorCurrent = motorController.getStatorCurrent().getValueAsDouble();
     double supplyCurrent = motorController.getSupplyCurrent().getValueAsDouble();
-    inputs.velocities[0] = flywheelSim.getAngularVelocityRPM();
-    inputs.velocities[1] =
+    inputs.velocityRPM[0] = flywheelSim.getAngularVelocityRPM();
+    inputs.velocityRPM[1] =
         flywheelSim.getAngularVelocityRPM(); // Both motors share the same shaft velocity
     inputs.voltages[0] = motorVoltage;
     inputs.voltages[1] = motorVoltage; // Same command sent to both physical motors

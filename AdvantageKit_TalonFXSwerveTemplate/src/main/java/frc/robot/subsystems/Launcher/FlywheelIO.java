@@ -8,7 +8,6 @@ public interface FlywheelIO {
   public static class FlywheelIOInputs {
     double[] statorCurrentAmps = new double[2];
     double[] velocityRPM = new double[2];
-    double[] velocities = new double[2];
     double[] voltages = new double[2];
   }
 
