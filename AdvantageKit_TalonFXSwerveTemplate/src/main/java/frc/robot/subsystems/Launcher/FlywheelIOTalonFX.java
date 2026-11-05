@@ -22,7 +22,7 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     private final StatusSignal<Current> rightStatorCurrentSignal;
     private final StatusSignal<Current> leftStatorCurrentSignal;
 
-    FlywheelIOTalonFX() {
+    public FlywheelIOTalonFX() {
         TalonFXConfiguration defaultConfig = new TalonFXConfiguration();
         for (TalonFX motor : motors) {
             motor.getConfigurator().apply(defaultConfig);

@@ -116,6 +116,7 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
                     VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
       default:
