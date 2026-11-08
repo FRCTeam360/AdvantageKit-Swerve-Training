@@ -94,9 +94,12 @@ public class Vision extends SubsystemBase {
       for (var observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
         boolean rejectPose =
-            observation.tagCount() == 0 // Must have at least one tag
-                || (observation.tagCount() == 1
-                    && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
+            (observation.type() == PoseObservationType.QUESTNAV
+                    ? false
+                    : // Skip tag checks for questnav
+                    (observation.tagCount() == 0 // Must have at least one tag
+                        || (observation.tagCount() == 1
+                            && observation.ambiguity() > maxAmbiguity))) // Cannot be high ambiguity
                 || Math.abs(observation.pose().getZ())
                     > maxZError // Must have realistic Z coordinate
 
@@ -127,6 +130,9 @@ public class Vision extends SubsystemBase {
         if (observation.type() == PoseObservationType.MEGATAG_2) {
           linearStdDev *= linearStdDevMegatag2Factor;
           angularStdDev *= angularStdDevMegatag2Factor;
+        } else if (observation.type() == PoseObservationType.QUESTNAV) {
+          linearStdDev = linearStdDevQuest;
+          angularStdDev = angularStdDevQuest;
         }
         if (cameraIndex < cameraStdDevFactors.length) {
           linearStdDev *= cameraStdDevFactors[cameraIndex];

@@ -8,8 +8,12 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,12 +23,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.Launcher.Flywheel;
-import frc.robot.subsystems.Launcher.FlywheelIO;
-import frc.robot.subsystems.Launcher.FlywheelIOInputsAutoLogged;
 import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
-import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
+import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -36,6 +37,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionIOQuestNav;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -57,6 +59,9 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  // QuestNav
+  private final VisionIOQuestNav questNav;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -92,11 +97,14 @@ public class RobotContainer {
         // new ModuleIOTalonFXS(TunerConstants.BackLeft),
         // new ModuleIOTalonFXS(TunerConstants.BackRight));
 
+        questNav = new VisionIOQuestNav();
+
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
-        
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+                questNav);
+
         flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
@@ -200,6 +208,24 @@ public class RobotContainer {
     // does the roller roll and the roll of the and roller the rolling
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
+
+    // Zeroes questnav to left red corner hopefully
+    controller
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  if (questNav == null) return;
+                  AprilTagFieldLayout field =
+                      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+                  questNav.setPose(
+                      new Pose3d(
+                              field.getFieldLength() - Constants.robotXWidth,
+                              field.getFieldWidth() - Constants.robotYWidth,
+                              0,
+                              new Rotation3d(0.0, 0.0, 0.0))
+                          .transformBy(VisionConstants.robotToQuest));
+                }).ignoringDisable(true));
   }
 
   /**
