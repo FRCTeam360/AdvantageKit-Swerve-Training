@@ -214,18 +214,19 @@ public class RobotContainer {
         .back()
         .onTrue(
             Commands.runOnce(
-                () -> {
-                  if (questNav == null) return;
-                  AprilTagFieldLayout field =
-                      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-                  questNav.setPose(
-                      new Pose3d(
-                              field.getFieldLength() - Constants.robotXWidth,
-                              field.getFieldWidth() - Constants.robotYWidth,
-                              0,
-                              new Rotation3d(0.0, 0.0, 0.0))
-                          .transformBy(VisionConstants.robotToQuest));
-                }).ignoringDisable(true));
+                    () -> {
+                      if (questNav == null) return;
+                      AprilTagFieldLayout field =
+                          AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+                      questNav.setPose(
+                          new Pose3d(
+                                  field.getFieldLength() - Constants.robotXWidth,
+                                  field.getFieldWidth() - Constants.robotYWidth,
+                                  0,
+                                  new Rotation3d(0.0, 0.0, 0.0))
+                              .transformBy(VisionConstants.robotToQuest));
+                    })
+                .ignoringDisable(true));
   }
 
   /**
