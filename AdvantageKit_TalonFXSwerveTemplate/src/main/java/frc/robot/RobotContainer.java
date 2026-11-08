@@ -61,7 +61,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   // QuestNav
-  private final VisionIOQuestNav questNav;
+  private VisionIOQuestNav questNav = null;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

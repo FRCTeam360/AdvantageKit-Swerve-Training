@@ -4,6 +4,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 import java.util.LinkedList;
@@ -24,7 +25,15 @@ public class VisionIOQuestNav implements VisionIO {
     // Updates callbacks
     questNav.commandPeriodic();
 
-    inputs.connected = questNav.isConnected();
+    questNav.onConnected(() -> inputs.connected = true);
+    questNav.onDisconnected(() -> inputs.connected = false);
+
+    questNav.onTrackingAcquired(() -> SmartDashboard.putBoolean("QuestNav/Tracking", true));
+    questNav.onTrackingLost(() -> SmartDashboard.putBoolean("QuestNav/Tracking", false));
+
+    questNav
+        .getBatteryPercent()
+        .ifPresent(b -> SmartDashboard.putNumber("QuestNav/BatteryPercent", b));
 
     List<PoseObservation> poseObservations = new LinkedList<>();
 
