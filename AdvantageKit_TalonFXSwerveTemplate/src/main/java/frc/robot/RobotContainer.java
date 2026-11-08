@@ -209,7 +209,7 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
 
-    // Zeroes questnav to left red corner hopefully
+    // Zeros questnav to left red corner hopefully
     controller
         .back()
         .onTrue(
