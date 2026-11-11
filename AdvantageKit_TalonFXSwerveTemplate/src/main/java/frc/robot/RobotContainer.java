@@ -223,8 +223,7 @@ public class RobotContainer {
                                   field.getFieldLength() - Constants.robotXWidth,
                                   field.getFieldWidth() - Constants.robotYWidth,
                                   0,
-                                  new Rotation3d(0.0, 0.0, 0.0))
-                              .transformBy(VisionConstants.robotToQuest));
+                                  new Rotation3d(0.0, 0.0, 0.0)));
                     })
                 .ignoringDisable(true));
   }

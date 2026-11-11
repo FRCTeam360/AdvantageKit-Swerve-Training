@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,9 +16,13 @@ public class VisionIOQuestNav implements VisionIO {
 
   public VisionIOQuestNav() {}
 
-  // Tell quest where it is
+  // Tell quest where it is (pass robot pose)
   public void setPose(Pose3d pose) {
-    questNav.setPose(pose);
+    questNav.setPose(pose.transformBy(robotToQuest));
+  }
+
+  public void setPose(Pose2d pose){
+    questNav.setPose(new Pose3d(pose).transformBy(robotToQuest));
   }
 
   @Override
