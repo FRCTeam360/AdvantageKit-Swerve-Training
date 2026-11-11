@@ -18,6 +18,10 @@ public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
+  // TODO: Update with actual robot dimensions
+  public static final double robotXWidth = 0.7;
+  public static final double robotYWidth = 0.7;
+
   public static enum Mode {
     /** Running on a real robot. */
     REAL,
