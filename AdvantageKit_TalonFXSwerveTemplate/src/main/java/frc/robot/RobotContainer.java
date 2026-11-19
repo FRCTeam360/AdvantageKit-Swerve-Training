@@ -20,6 +20,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Roller;
+import frc.robot.subsystems.Launcher.Flywheel;
+import frc.robot.subsystems.Launcher.FlywheelIO;
+import frc.robot.subsystems.Launcher.FlywheelIOInputsAutoLogged;
+import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
+import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -47,6 +52,8 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+
+  private final Flywheel flywheel;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -97,6 +104,8 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+        
+        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
       case SIM:
@@ -118,6 +127,7 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
                     VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
+        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
       default:
@@ -133,6 +143,7 @@ public class RobotContainer {
                 (robotPose) -> {});
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
+        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
     }
 
