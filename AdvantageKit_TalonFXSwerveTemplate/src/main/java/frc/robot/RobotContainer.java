@@ -213,7 +213,7 @@ public class RobotContainer {
     // calls VisionIOLimelight.captureRewind() when the right bumper is pressed
     controller.rightBumper.onTrue(new InstantCommand(() -> vision.captureRewind(30)));
 
-    controller.leftBumper().whileTrue(new InstantCommand(() -> flywheel.setDutyCycle(1.0)));
+    controller.leftBumper().whileTrue(flywheel.setDutyCycleCommand(() -> 1.0));
   }
 
   /**
