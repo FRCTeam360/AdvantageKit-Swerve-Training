@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -17,10 +18,11 @@ import edu.wpi.first.wpilibj.RobotBase;
  */
 public final class Constants {
   public static final RobotType simMode = RobotType.SIM;
-  public static final RobotType currentMode = RobotBase.isReal() ? RobotType.REAL : RobotType.SIM;
+  public static final RobotType currentMode = RobotBase.isReal() ? getRobotType() : RobotType.SIM;
 
   public static final class SerialAddressConstants {
-    public static String DRIVEBASE2025_SERIAL_ADDRESS = "03126d42";
+    public static final String DRIVEBASE2025_SERIAL_ADDRESS = "03126d42";
+    public static final String DRIVEBASE2024_SERIAL_ADDRESS = "03064DB8";
   }
 
   private static RobotType getRobotType() {
@@ -31,10 +33,17 @@ public final class Constants {
 
     String serialAddress = HALUtil.getSerialNumber();
 
-    if (serialAddress.equals(SerialAddressConstants.DRIVEBASE2025_SERIAL_ADDRESS)) {
-      robotType = Constants.RobotType.COMPBOT_2025;
-    } else {
-      robotType = Constants.RobotType.COMPBOT_2025;
+    switch (serialAddress) {
+      case SerialAddressConstants.DRIVEBASE2025_SERIAL_ADDRESS -> robotType = RobotType.COMPBOT_2025;
+      case SerialAddressConstants.DRIVEBASE2024_SERIAL_ADDRESS -> robotType = RobotType.COMPBOT_2024;
+      default -> {
+        DriverStation.reportWarning(
+            "Unknown serial \""
+                + serialAddress
+                + "\", defaulting to 2025 compbot",
+            false);
+        robotType = RobotType.COMPBOT_2025;
+      }
     }
     return robotType;
   }
