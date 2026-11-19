@@ -9,9 +9,7 @@ import edu.wpi.first.units.measure.Current;
 import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
 
 public class FlywheelIOTalonFX implements FlywheelIO {
-  private final TalonFX[] motors = {
-    new TalonFX(9999999, new CANBus()), new TalonFX(999999999, new CANBus())
-  };
+  private final TalonFX[] motors = {new TalonFX(32, new CANBus()), new TalonFX(33, new CANBus())};
   private final StatusSignal<AngularVelocity> rightVelocitySignal;
   private final StatusSignal<AngularVelocity> leftVelocitySignal;
   private final StatusSignal<Current> rightStatorCurrentSignal;
