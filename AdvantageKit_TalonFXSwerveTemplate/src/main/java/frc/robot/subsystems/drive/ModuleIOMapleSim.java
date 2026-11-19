@@ -47,7 +47,7 @@ public class ModuleIOMapleSim implements ModuleIO {
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
-  public void ModuleIOSim(SwerveModuleSimulation moduleSimulation) {
+  public ModuleIOMapleSim(SwerveModuleSimulation moduleSimulation) {
     this.moduleSimulation = moduleSimulation;
     this.driveMotor =
         moduleSimulation

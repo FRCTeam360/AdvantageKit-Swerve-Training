@@ -46,7 +46,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-
   private final Vision vision;
 
   // Controller
@@ -113,7 +112,6 @@ public class RobotContainer {
                 new ModuleIOMapleSim(driveSimulation.getModules()[2]),
                 new ModuleIOMapleSim(driveSimulation.getModules()[3]),
                 driveSimulation::setSimulationWorldPose);
-        break;
 
         vision =
             new Vision(
@@ -131,7 +129,8 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
-                new ModuleIO() {});
+                new ModuleIO() {},
+                (robotPose) -> {});
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
         break;
