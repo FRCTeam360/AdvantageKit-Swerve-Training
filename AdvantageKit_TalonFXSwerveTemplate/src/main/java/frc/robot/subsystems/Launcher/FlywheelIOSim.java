@@ -43,7 +43,7 @@ public class FlywheelIOSim implements FlywheelIO {
   private boolean disturbanceActive = false;
 
   // Single motor controller - gearbox is modeled as 2x Kraken X60 to retain combined power
-  private final TalonFX motorController = new TalonFX(9999);
+  private final TalonFX motorController = new TalonFX(32);
 
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withSlot(0);
 

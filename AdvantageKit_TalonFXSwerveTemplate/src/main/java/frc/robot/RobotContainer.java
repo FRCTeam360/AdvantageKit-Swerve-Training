@@ -211,7 +211,7 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
 
-    controller.leftBumper().whileTrue(new InstantCommand(() -> flywheel.setDutyCycle(1)));
+    controller.leftBumper().whileTrue(new InstantCommand(() -> flywheel.setDutyCycle(1.0)));
   }
 
   /**
