@@ -13,8 +13,8 @@ public class Flywheel extends SubsystemBase {
     this.io = io;
   }
 
-  public void setDutyCycle(double doodoo) {
-    io.setDutyCycle(doodoo);
+  public void setDutyCycle(double duty) {
+    io.setDutyCycle(duty);
   }
 
   public Command setDutyCycleCommand(DoubleSupplier valueSup) {
