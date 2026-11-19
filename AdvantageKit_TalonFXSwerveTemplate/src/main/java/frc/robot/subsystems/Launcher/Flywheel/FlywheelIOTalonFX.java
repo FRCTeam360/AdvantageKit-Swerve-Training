@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Launcher;
+package frc.robot.subsystems.Launcher.Flywheel;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
+import frc.robot.subsystems.Launcher.Flywheel.FlywheelIO.FlywheelIOInputs;
 
 public class FlywheelIOTalonFX implements FlywheelIO {
   private final TalonFX[] motors = {new TalonFX(32, new CANBus()), new TalonFX(33, new CANBus())};
