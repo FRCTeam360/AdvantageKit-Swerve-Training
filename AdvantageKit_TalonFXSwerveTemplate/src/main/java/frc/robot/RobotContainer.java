@@ -19,12 +19,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.Launcher.Flywheel;
-import frc.robot.subsystems.Launcher.FlywheelIO;
-import frc.robot.subsystems.Launcher.FlywheelIOInputsAutoLogged;
 import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
-import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
+import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -61,6 +58,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
+      case COMPBOT_2026:
+
+      case COMPBOT_2025:
+
+      case COMPBOT_2024:
+
       case REAL:
 
         // Real robot, instantiate hardware IO implementations
@@ -96,7 +99,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
-        
+
         flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
