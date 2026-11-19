@@ -142,7 +142,7 @@ public class VisionIOLimelight implements VisionIO {
 
   @Override
   public void captureRewind(double durationSeconds) {
-    LimelightHelpers.triggerRewindCapture("",durationSeconds);
+    LimelightHelpers.triggerRewindCapture("limelight-left",durationSeconds);
   }
   /** Parses the 3D pose from a Limelight botpose array. */
   private static Pose3d parsePose(double[] rawLLArray) {
