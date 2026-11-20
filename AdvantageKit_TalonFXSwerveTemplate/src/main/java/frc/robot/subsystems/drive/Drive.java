@@ -45,6 +45,10 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -64,6 +68,11 @@ public class Drive extends SubsystemBase {
   private static final double ROBOT_MASS_KG = 74.088;
   private static final double ROBOT_MOI = 6.883;
   private static final double WHEEL_COF = 1.2;
+  // Steer inertia used only by the maple-sim chassis simulation. The value in TunerConstants (0.004
+  // kg*m^2) is below maple-sim's accepted range of 0.005 to 0.06, and a steer inertia that low can
+  // make the simulated steering velocity infinite, which turns the robot pose into NaN. See
+  // https://github.com/Shenzhen-Robotics-Alliance/maple-sim/issues/86
+  private static final double SIM_STEER_INERTIA_KG_M2 = 0.05;
   private static final RobotConfig PP_CONFIG =
       new RobotConfig(
           ROBOT_MASS_KG,
@@ -95,16 +104,39 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
+  /** Returns the maple-sim description of this chassis, built from the same constants as above. */
+  public static DriveTrainSimulationConfig getMapleSimConfig() {
+    return DriveTrainSimulationConfig.Default()
+        .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
+        .withCustomModuleTranslations(getModuleTranslations())
+        .withGyro(COTS.ofPigeon2())
+        .withSwerveModule(
+            new SwerveModuleSimulationConfig(
+                DCMotor.getKrakenX60Foc(1),
+                DCMotor.getKrakenX60Foc(1),
+                TunerConstants.FrontLeft.DriveMotorGearRatio,
+                TunerConstants.FrontLeft.SteerMotorGearRatio,
+                Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage),
+                Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage),
+                Meters.of(TunerConstants.FrontLeft.WheelRadius),
+                KilogramSquareMeters.of(SIM_STEER_INERTIA_KG_M2),
+                WHEEL_COF));
+  }
+
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
+
+  private final Consumer<Pose2d> resetSimulationPoseCallback;
 
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
       ModuleIO frModuleIO,
       ModuleIO blModuleIO,
-      ModuleIO brModuleIO) {
+      ModuleIO brModuleIO,
+      Consumer<Pose2d> resetSimulationPoseCallback) {
     this.gyroIO = gyroIO;
+    this.resetSimulationPoseCallback = resetSimulationPoseCallback;
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
     modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
@@ -325,6 +357,7 @@ public class Drive extends SubsystemBase {
 
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
+    resetSimulationPoseCallback.accept(pose);
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 

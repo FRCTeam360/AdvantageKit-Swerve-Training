@@ -34,14 +34,13 @@ public final class Constants {
     String serialAddress = HALUtil.getSerialNumber();
 
     switch (serialAddress) {
-      case SerialAddressConstants.DRIVEBASE2025_SERIAL_ADDRESS -> robotType = RobotType.COMPBOT_2025;
-      case SerialAddressConstants.DRIVEBASE2024_SERIAL_ADDRESS -> robotType = RobotType.COMPBOT_2024;
+      case SerialAddressConstants.DRIVEBASE2025_SERIAL_ADDRESS -> robotType =
+          RobotType.COMPBOT_2025;
+      case SerialAddressConstants.DRIVEBASE2024_SERIAL_ADDRESS -> robotType =
+          RobotType.COMPBOT_2024;
       default -> {
         DriverStation.reportWarning(
-            "Unknown serial \""
-                + serialAddress
-                + "\", defaulting to 2025 compbot",
-            false);
+            "Unknown serial \"" + serialAddress + "\", defaulting to 2025 compbot", false);
         robotType = RobotType.COMPBOT_2025;
       }
     }
