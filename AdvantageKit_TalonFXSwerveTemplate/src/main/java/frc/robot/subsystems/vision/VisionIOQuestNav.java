@@ -27,15 +27,12 @@ public class VisionIOQuestNav implements VisionIO {
 
   @Override
   public void updateInputs(VisionIOInputs inputs) {
-    // Updates callbacks
+    // Process command responses and update state
     questNav.commandPeriodic();
 
-    questNav.onConnected(() -> inputs.connected = true);
-    questNav.onDisconnected(() -> inputs.connected = false);
+    inputs.connected = questNav.isConnected();
 
-    questNav.onTrackingAcquired(() -> SmartDashboard.putBoolean("QuestNav/Tracking", true));
-    questNav.onTrackingLost(() -> SmartDashboard.putBoolean("QuestNav/Tracking", false));
-
+    SmartDashboard.putBoolean("QuestNav/Tracking", questNav.isTracking());
     questNav
         .getBatteryPercent()
         .ifPresent(b -> SmartDashboard.putNumber("QuestNav/BatteryPercent", b));
