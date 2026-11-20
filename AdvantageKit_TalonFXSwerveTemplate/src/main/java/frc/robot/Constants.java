@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.hal.HALUtil;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -15,12 +17,47 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
-  public static final Mode simMode = Mode.SIM;
-  public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
+  public static final RobotType simMode = RobotType.SIM;
+  public static final RobotType currentMode = RobotBase.isReal() ? getRobotType() : RobotType.SIM;
 
-  public static enum Mode {
+  public static final class SerialAddressConstants {
+    public static final String DRIVEBASE2025_SERIAL_ADDRESS = "03126d42";
+    public static final String DRIVEBASE2024_SERIAL_ADDRESS = "03064DB8";
+  }
+
+  private static RobotType getRobotType() {
+    if (!Robot.isReal()) {
+      robotType = Constants.RobotType.SIM;
+      return robotType;
+    }
+
+    String serialAddress = HALUtil.getSerialNumber();
+
+    switch (serialAddress) {
+      case SerialAddressConstants.DRIVEBASE2025_SERIAL_ADDRESS -> robotType =
+          RobotType.COMPBOT_2025;
+      case SerialAddressConstants.DRIVEBASE2024_SERIAL_ADDRESS -> robotType =
+          RobotType.COMPBOT_2024;
+      default -> {
+        DriverStation.reportWarning(
+            "Unknown serial \"" + serialAddress + "\", defaulting to 2025 compbot", false);
+        robotType = RobotType.COMPBOT_2025;
+      }
+    }
+    return robotType;
+  }
+
+  static RobotType robotType;
+
+  public static enum RobotType {
     /** Running on a real robot. */
     REAL,
+
+    COMPBOT_2026,
+
+    COMPBOT_2025,
+
+    COMPBOT_2024,
 
     /** Running a physics simulator. */
     SIM,
