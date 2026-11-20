@@ -210,6 +210,8 @@ public class RobotContainer {
     // does the roller roll and the roll of the and roller the rolling
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
+    // calls VisionIOLimelight.captureRewind() when the right bumper is pressed
+    controller.rightBumper.onTrue(new InstantCommand(() -> vision.captureRewind(30)));
 
     controller.leftBumper().whileTrue(flywheel.setDutyCycleCommand(() -> 1.0));
   }

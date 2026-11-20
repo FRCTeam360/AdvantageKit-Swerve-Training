@@ -7,6 +7,12 @@
 
 package frc.robot.subsystems.vision;
 
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -16,16 +22,13 @@ import edu.wpi.first.networktables.DoubleArraySubscriber;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotController;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
+
 
 /** IO implementation for real Limelight hardware. */
 public class VisionIOLimelight implements VisionIO {
   private final Supplier<Rotation2d> rotationSupplier;
   private final DoubleArrayPublisher orientationPublisher;
+  private final String name;
 
   private final DoubleSubscriber latencySubscriber;
   private final DoubleSubscriber txSubscriber;
@@ -42,6 +45,7 @@ public class VisionIOLimelight implements VisionIO {
   public VisionIOLimelight(String name, Supplier<Rotation2d> rotationSupplier) {
     var table = NetworkTableInstance.getDefault().getTable(name);
     this.rotationSupplier = rotationSupplier;
+    this.name = name;
     orientationPublisher = table.getDoubleArrayTopic("robot_orientation_set").publish();
     latencySubscriber = table.getDoubleTopic("tl").subscribe(0.0);
     txSubscriber = table.getDoubleTopic("tx").subscribe(0.0);
@@ -138,6 +142,10 @@ public class VisionIOLimelight implements VisionIO {
     }
   }
 
+  @Override
+  public void captureRewind(double durationSeconds) {
+    LimelightHelpers.triggerRewindCapture(this.name,durationSeconds);
+  }
   /** Parses the 3D pose from a Limelight botpose array. */
   private static Pose3d parsePose(double[] rawLLArray) {
     return new Pose3d(
