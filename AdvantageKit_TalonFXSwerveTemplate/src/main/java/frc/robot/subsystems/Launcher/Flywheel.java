@@ -3,6 +3,7 @@ package frc.robot.subsystems.Launcher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
   private final FlywheelIO io;
@@ -12,7 +13,7 @@ public class Flywheel extends SubsystemBase {
     this.io = io;
   }
 
-  private void setDutyCycle(double duty) {
+  public void setDutyCycle(double duty) {
     io.setDutyCycle(duty);
   }
 
@@ -23,5 +24,6 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    Logger.processInputs(getName(), inputs);
   }
 }
