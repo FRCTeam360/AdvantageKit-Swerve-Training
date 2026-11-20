@@ -3,13 +3,15 @@ package frc.robot.subsystems.Launcher;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import frc.robot.subsystems.Launcher.FlywheelIO.FlywheelIOInputs;
 
 public class FlywheelIOTalonFX implements FlywheelIO {
-  private final TalonFX[] motors = {new TalonFX(61, new CANBus()), new TalonFX(61, new CANBus())};
+  private final TalonFX[] motors = {new TalonFX(32, new CANBus()), new TalonFX(33, new CANBus())};
   private final StatusSignal<AngularVelocity> rightVelocitySignal;
   private final StatusSignal<AngularVelocity> leftVelocitySignal;
   private final StatusSignal<Current> rightStatorCurrentSignal;
@@ -32,8 +34,12 @@ public class FlywheelIOTalonFX implements FlywheelIO {
     inputs.statorCurrentAmps[0] = rightStatorCurrentSignal.getValueAsDouble();
     inputs.velocityRPM[1] = leftVelocitySignal.getValueAsDouble();
     inputs.velocityRPM[0] = rightVelocitySignal.getValueAsDouble();
+
+    motors[1].setControl(new Follower(32, MotorAlignmentValue.Opposed));
   }
 
   @Override
-  public void setDutyCycle(double doody) {}
+  public void setDutyCycle(double duty) {
+    motors[0].set(duty);
+  }
 }
