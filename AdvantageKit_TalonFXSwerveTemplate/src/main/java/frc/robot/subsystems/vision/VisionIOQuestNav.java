@@ -21,7 +21,7 @@ public class VisionIOQuestNav implements VisionIO {
     questNav.setPose(pose.transformBy(robotToQuest));
   }
 
-  public void setPose(Pose2d pose){
+  public void setPose(Pose2d pose) {
     questNav.setPose(new Pose3d(pose).transformBy(robotToQuest));
   }
 
