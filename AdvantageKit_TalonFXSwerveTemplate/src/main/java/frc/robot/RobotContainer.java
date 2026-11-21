@@ -73,6 +73,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
+      case COMPBOT_2026:
+
+      case COMPBOT_2025:
+
+      case COMPBOT_2024:
+
       case REAL:
 
         // Real robot, instantiate hardware IO implementations
@@ -251,7 +257,7 @@ public class RobotContainer {
   }
   /** Moves the simulated robot back to its starting pose and resets the field. Sim only. */
   public void resetSimulation() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
+    if (Constants.currentMode != Constants.RobotType.SIM) return;
 
     drive.setPose(SIM_START_POSE);
     SimulatedArena.getInstance().resetFieldForAuto();
@@ -259,7 +265,7 @@ public class RobotContainer {
 
   /** Steps the physics simulation and logs the true robot pose and game pieces. Sim only. */
   public void updateSimulation() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
+    if (Constants.currentMode != Constants.RobotType.SIM) return;
 
     SimulatedArena.getInstance().simulationPeriodic();
     Logger.recordOutput(
