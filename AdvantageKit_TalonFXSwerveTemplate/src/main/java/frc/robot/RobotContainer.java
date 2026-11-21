@@ -8,8 +8,12 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,6 +39,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.subsystems.vision.VisionIOQuestNav;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -59,6 +64,8 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  // QuestNav
+  private VisionIOQuestNav questNav = null;
   // Simulation
   private static final Pose2d SIM_START_POSE = new Pose2d(3.0, 3.0, Rotation2d.kZero);
   private SwerveDriveSimulation driveSimulation = null;
@@ -66,6 +73,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
+      case COMPBOT_2026:
+
+      case COMPBOT_2025:
+
+      case COMPBOT_2024:
+
       case REAL:
 
         // Real robot, instantiate hardware IO implementations
@@ -98,10 +111,13 @@ public class RobotContainer {
         // new ModuleIOTalonFXS(TunerConstants.BackLeft),
         // new ModuleIOTalonFXS(TunerConstants.BackRight));
 
+        questNav = new VisionIOQuestNav();
+
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
+                questNav);
 
         flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
@@ -211,6 +227,23 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
 
+    // Zeros questnav to left red corner hopefully
+    controller
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                    () -> {
+                      if (questNav == null) return;
+                      AprilTagFieldLayout field =
+                          AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+                      questNav.setPose(
+                          new Pose3d(
+                              field.getFieldLength() - Constants.robotXWidth,
+                              field.getFieldWidth() - Constants.robotYWidth,
+                              0,
+                              new Rotation3d(0.0, 0.0, 0.0)));
+                    })
+                .ignoringDisable(true));
     controller.leftBumper().whileTrue(flywheel.setDutyCycleCommand(() -> 1.0));
   }
 
@@ -224,7 +257,7 @@ public class RobotContainer {
   }
   /** Moves the simulated robot back to its starting pose and resets the field. Sim only. */
   public void resetSimulation() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
+    if (Constants.currentMode != Constants.RobotType.SIM) return;
 
     drive.setPose(SIM_START_POSE);
     SimulatedArena.getInstance().resetFieldForAuto();
@@ -232,7 +265,7 @@ public class RobotContainer {
 
   /** Steps the physics simulation and logs the true robot pose and game pieces. Sim only. */
   public void updateSimulation() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
+    if (Constants.currentMode != Constants.RobotType.SIM) return;
 
     SimulatedArena.getInstance().simulationPeriodic();
     Logger.recordOutput(
