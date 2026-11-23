@@ -58,6 +58,19 @@ public class Vision extends SubsystemBase {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
+  /**
+   * Resets the field reference of every localization source that maintains its own frame
+   * (QuestNav). Tag-based cameras ignore this.
+   *
+   * @param robotPose known robot pose on the field
+   */
+  public void setPose(Pose2d robotPose) {
+    for (VisionIO io : io) {
+      io.setPose(robotPose);
+    }
+    Logger.recordOutput("Vision/PoseReset", robotPose);
+  }
+
   @Override
   public void periodic() {
     for (int i = 0; i < io.length; i++) {

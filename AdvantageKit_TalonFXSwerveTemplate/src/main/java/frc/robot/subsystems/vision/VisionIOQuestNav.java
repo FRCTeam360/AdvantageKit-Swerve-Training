@@ -11,6 +11,13 @@ import gg.questnav.questnav.QuestNav;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Vision IO layer for a Quest headset running QuestNav.
+ *
+ * <p>QuestNav maintains its own field-relative frame, so it is the one source that must be told the
+ * robot's pose when that frame is re-established (see {@link #setPose(Pose2d)}). Tag-based cameras
+ * do not need this.
+ */
 public class VisionIOQuestNav implements VisionIO {
   private final QuestNav questNav = new QuestNav();
 
@@ -22,6 +29,7 @@ public class VisionIOQuestNav implements VisionIO {
     questNav.setPose(pose.transformBy(robotToQuest));
   }
 
+  @Override
   public void setPose(Pose2d pose) {
     questNav.setPose(new Pose3d(pose).transformBy(robotToQuest));
   }

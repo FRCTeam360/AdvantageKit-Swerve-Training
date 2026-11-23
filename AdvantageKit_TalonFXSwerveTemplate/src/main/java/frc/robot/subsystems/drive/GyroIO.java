@@ -21,4 +21,7 @@ public interface GyroIO {
   }
 
   public default void updateInputs(GyroIOInputs inputs) {}
+
+  /** Resets the gyro's heading reference to 0. */
+  public default void setZero() {}
 }

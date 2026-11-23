@@ -362,6 +362,18 @@ public class Drive extends SubsystemBase {
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
   }
 
+  /** Zeros the entire drivetrain odometry: gyro, pose, and rotation. Places the robot at (0, 0, 0°). */
+  public void zero() {
+    gyroIO.setZero();
+    rawGyroRotation = Rotation2d.kZero;
+    setPose(new Pose2d(0.0, 0.0, Rotation2d.kZero));
+  }
+
+  /** Returns a command that zeroes the entire drivetrain odometry. */
+  public Command zeroCommand() {
+    return runOnce(() -> zero());
+  }
+
   /** Adds a new timestamped vision measurement. */
   public void addVisionMeasurement(
       Pose2d visionRobotPoseMeters,

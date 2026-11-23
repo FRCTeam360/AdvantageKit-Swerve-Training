@@ -60,8 +60,6 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  // QuestNav
-  private VisionIOQuestNav questNav = null;
   // Simulation
   private static final Pose2d SIM_START_POSE = new Pose2d(3.0, 3.0, Rotation2d.kZero);
   private SwerveDriveSimulation driveSimulation = null;
@@ -107,13 +105,11 @@ public class RobotContainer {
         // new ModuleIOTalonFXS(Drivebase2025.BackLeft),
         // new ModuleIOTalonFXS(Drivebase2025.BackRight));
 
-        questNav = new VisionIOQuestNav();
-
         vision =
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                questNav);
+                new VisionIOQuestNav());
 
         flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
@@ -209,32 +205,37 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+    // 2025 drivebase: both reset bindings on the d-pad, so the drivetrain can be zeroed
+    // without touching the Quest headset (and the Quest headset can be seeded alone).
+    //   up = drivetrain zero, down = QuestNav seed.
+    if (Constants.currentMode == Constants.RobotType.COMPBOT_2025) {
+      controller.povUp().onTrue(drive.zeroCommand());
+      controller.povDown().onTrue(seedQuestNavCommand());
+    } else {
+      controller.back().onTrue(drive.zeroCommand());
+    }
     // does the roller roll and the roll of the and roller the rolling
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
-
-    // Tell QuestNav where the robot is, so it can establish field-relative tracking.
-    // Press this while the robot is sitting at a known pose (e.g. placed on the field).
-    controller
-        .back()
-        .onTrue(
-            Commands.runOnce(
-                    () -> {
-                      if (questNav == null) return;
-                      questNav.setPose(drive.getPose());
-                    })
-                .ignoringDisable(true));
     controller.leftBumper().whileTrue(flywheel.setDutyCycleCommand(() -> 1.0));
+  }
+
+  /**
+   * Builds the command that seeds the Quest headset at a fixed corner of the field. QuestNav's
+   * AprilTag support may make this unnecessary, so it is only a backup.
+   */
+  private Command seedQuestNavCommand() {
+    return Commands.runOnce(
+            () -> {
+              double seedX =
+                  VisionConstants.aprilTagLayout.getFieldLength()
+                      - Constants.QUEST_SEED_EDGE_MARGIN_METERS;
+              double seedY =
+                  VisionConstants.aprilTagLayout.getFieldWidth()
+                      - Constants.QUEST_SEED_EDGE_MARGIN_METERS;
+              vision.setPose(new Pose2d(seedX, seedY, Rotation2d.kZero));
+            })
+        .ignoringDisable(true);
   }
 
   /**

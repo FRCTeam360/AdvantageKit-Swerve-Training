@@ -7,6 +7,7 @@
 
 package frc.robot.subsystems.vision;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
@@ -41,4 +42,12 @@ public interface VisionIO {
   }
 
   public default void updateInputs(VisionIOInputs inputs) {}
+
+  /**
+   * Resets this source's field reference to a known robot pose. Sources that maintain their own
+   * field frame (QuestNav) should override this. Tag-based cameras do not need to.
+   *
+   * @param robotPose known robot pose on the field
+   */
+  public default void setPose(Pose2d pose) {}
 }

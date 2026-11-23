@@ -20,6 +20,12 @@ public final class Constants {
   public static final RobotType simMode = RobotType.SIM;
   public static final RobotType currentMode = RobotBase.isReal() ? getRobotType() : RobotType.SIM;
 
+  // === QUESTNAV POSE SEED ===
+  // QuestNav is seeded to a fixed corner as a backup; QuestNav's AprilTag support may let it
+  // self-locate instead. The seed is offset this far in from the far corner edges. TODO:
+  // measure the Quest headset mount on the 2025 drivebase and use its real robot dimensions.
+  public static final double QUEST_SEED_EDGE_MARGIN_METERS = 0.7;
+
   public static final class SerialAddressConstants {
     public static final String DRIVEBASE2025_SERIAL_ADDRESS = "03126d42";
     public static final String DRIVEBASE2024_SERIAL_ADDRESS = "03064DB8";

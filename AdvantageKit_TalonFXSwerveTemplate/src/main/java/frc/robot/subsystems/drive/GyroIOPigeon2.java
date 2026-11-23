@@ -42,6 +42,12 @@ public class GyroIOPigeon2 implements GyroIO {
     yawPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(yaw.clone());
   }
 
+  /** Resets the gyro's heading reference to 0. */
+  @Override
+  public void setZero() {
+    pigeon.getConfigurator().setYaw(0.0);
+  }
+
   @Override
   public void updateInputs(GyroIOInputs inputs) {
     inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
