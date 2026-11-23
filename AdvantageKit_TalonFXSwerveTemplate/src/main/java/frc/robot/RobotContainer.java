@@ -8,12 +8,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.generated.TunerConstants;
+import frc.robot.generated.Drivebase2025;
 import frc.robot.subsystems.Launcher.Flywheel;
 import frc.robot.subsystems.Launcher.FlywheelIOSim;
 import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
@@ -87,10 +83,10 @@ public class RobotContainer {
         drive =
             new Drive(
                 new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight),
+                new ModuleIOTalonFX(Drivebase2025.FrontLeft),
+                new ModuleIOTalonFX(Drivebase2025.FrontRight),
+                new ModuleIOTalonFX(Drivebase2025.BackLeft),
+                new ModuleIOTalonFX(Drivebase2025.BackRight),
                 (robotPose) -> {});
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
@@ -106,10 +102,10 @@ public class RobotContainer {
         // drive =
         // new Drive(
         // new GyroIOPigeon2(),
-        // new ModuleIOTalonFXS(TunerConstants.FrontLeft),
-        // new ModuleIOTalonFXS(TunerConstants.FrontRight),
-        // new ModuleIOTalonFXS(TunerConstants.BackLeft),
-        // new ModuleIOTalonFXS(TunerConstants.BackRight));
+        // new ModuleIOTalonFXS(Drivebase2025.FrontLeft),
+        // new ModuleIOTalonFXS(Drivebase2025.FrontRight),
+        // new ModuleIOTalonFXS(Drivebase2025.BackLeft),
+        // new ModuleIOTalonFXS(Drivebase2025.BackRight));
 
         questNav = new VisionIOQuestNav();
 
@@ -227,21 +223,15 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
     controller.y().onFalse(new InstantCommand(() -> roller.stop()));
 
-    // Zeros questnav to left red corner hopefully
+    // Tell QuestNav where the robot is, so it can establish field-relative tracking.
+    // Press this while the robot is sitting at a known pose (e.g. placed on the field).
     controller
         .back()
         .onTrue(
             Commands.runOnce(
                     () -> {
                       if (questNav == null) return;
-                      AprilTagFieldLayout field =
-                          AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-                      questNav.setPose(
-                          new Pose3d(
-                              field.getFieldLength() - Constants.robotXWidth,
-                              field.getFieldWidth() - Constants.robotYWidth,
-                              0,
-                              new Rotation3d(0.0, 0.0, 0.0)));
+                      questNav.setPose(drive.getPose());
                     })
                 .ignoringDisable(true));
     controller.leftBumper().whileTrue(flywheel.setDutyCycleCommand(() -> 1.0));

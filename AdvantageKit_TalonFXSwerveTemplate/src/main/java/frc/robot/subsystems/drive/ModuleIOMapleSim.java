@@ -18,7 +18,7 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.generated.TunerConstants;
+import frc.robot.generated.Drivebase2025;
 import frc.robot.util.PhoenixUtil;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -29,10 +29,10 @@ import org.ironmaple.simulation.motorsims.SimulatedMotorController;
  * constants from Phoenix. Simulation is always based on voltage control.
  */
 public class ModuleIOMapleSim implements ModuleIO {
-  // TunerConstants doesn't support separate sim constants, so they are declared locally
+  // Drivebase2025 doesn't support separate sim constants, so they are declared locally
   private static final double DRIVE_KS = 0.03;
   private static final double DRIVE_KV_ROT =
-      0.91035; // Same units as TunerConstants: (volt * secs) / rotation
+      0.91035; // Same units as Drivebase2025: (volt * secs) / rotation
   private static final double DRIVE_KV = 1.0 / Units.rotationsToRadians(1.0 / DRIVE_KV_ROT);
 
   private SwerveModuleSimulation moduleSimulation;
@@ -52,7 +52,7 @@ public class ModuleIOMapleSim implements ModuleIO {
     this.driveMotor =
         moduleSimulation
             .useGenericMotorControllerForDrive()
-            .withCurrentLimit(Amps.of(TunerConstants.FrontLeft.SlipCurrent));
+            .withCurrentLimit(Amps.of(Drivebase2025.FrontLeft.SlipCurrent));
     this.turnMotor = moduleSimulation.useGenericControllerForSteer().withCurrentLimit(Amps.of(20));
 
     this.driveController = new PIDController(0.05, 0.0, 0.0);

@@ -41,7 +41,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.RobotType;
-import frc.robot.generated.TunerConstants;
+import frc.robot.generated.Drivebase2025;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -53,24 +53,25 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
-  // TunerConstants doesn't include these constants, so they are declared locally
-  static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
+  // Drivebase2025 doesn't include these constants, so they are declared locally
+  static final double ODOMETRY_FREQUENCY = Drivebase2025.kCANBus.isNetworkFD() ? 250.0 : 100.0;
   public static final double DRIVE_BASE_RADIUS =
       Math.max(
           Math.max(
-              Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-              Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+              Math.hypot(Drivebase2025.FrontLeft.LocationX, Drivebase2025.FrontLeft.LocationY),
+              Math.hypot(Drivebase2025.FrontRight.LocationX, Drivebase2025.FrontRight.LocationY)),
           Math.max(
-              Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-              Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+              Math.hypot(Drivebase2025.BackLeft.LocationX, Drivebase2025.BackLeft.LocationY),
+              Math.hypot(Drivebase2025.BackRight.LocationX, Drivebase2025.BackRight.LocationY)));
 
   // PathPlanner config constants
   private static final double ROBOT_MASS_KG = 74.088;
   private static final double ROBOT_MOI = 6.883;
   private static final double WHEEL_COF = 1.2;
-  // Steer inertia used only by the maple-sim chassis simulation. The value in TunerConstants (0.004
-  // kg*m^2) is below maple-sim's accepted range of 0.005 to 0.06, and a steer inertia that low can
-  // make the simulated steering velocity infinite, which turns the robot pose into NaN. See
+  // Steer inertia used only by the maple-sim chassis simulation. Drivebase2025 has no tuned steer
+  // inertia that is safe for maple-sim, and a steer inertia that low can make the simulated
+  // steering velocity infinite, which turns the robot pose into NaN. Use a value in maple-sim's
+  // accepted range of 0.005 to 0.06. See
   // https://github.com/Shenzhen-Robotics-Alliance/maple-sim/issues/86
   private static final double SIM_STEER_INERTIA_KG_M2 = 0.05;
   private static final RobotConfig PP_CONFIG =
@@ -78,12 +79,12 @@ public class Drive extends SubsystemBase {
           ROBOT_MASS_KG,
           ROBOT_MOI,
           new ModuleConfig(
-              TunerConstants.FrontLeft.WheelRadius,
-              TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+              Drivebase2025.FrontLeft.WheelRadius,
+              Drivebase2025.kSpeedAt12Volts.in(MetersPerSecond),
               WHEEL_COF,
               DCMotor.getKrakenX60Foc(1)
-                  .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-              TunerConstants.FrontLeft.SlipCurrent,
+                  .withReduction(Drivebase2025.FrontLeft.DriveMotorGearRatio),
+              Drivebase2025.FrontLeft.SlipCurrent,
               1),
           getModuleTranslations());
 
@@ -114,11 +115,11 @@ public class Drive extends SubsystemBase {
             new SwerveModuleSimulationConfig(
                 DCMotor.getKrakenX60Foc(1),
                 DCMotor.getKrakenX60Foc(1),
-                TunerConstants.FrontLeft.DriveMotorGearRatio,
-                TunerConstants.FrontLeft.SteerMotorGearRatio,
-                Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage),
-                Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage),
-                Meters.of(TunerConstants.FrontLeft.WheelRadius),
+                Drivebase2025.FrontLeft.DriveMotorGearRatio,
+                Drivebase2025.FrontLeft.SteerMotorGearRatio,
+                Volts.of(Drivebase2025.FrontLeft.DriveFrictionVoltage),
+                Volts.of(Drivebase2025.FrontLeft.SteerFrictionVoltage),
+                Meters.of(Drivebase2025.FrontLeft.WheelRadius),
                 KilogramSquareMeters.of(SIM_STEER_INERTIA_KG_M2),
                 WHEEL_COF));
   }
@@ -137,10 +138,10 @@ public class Drive extends SubsystemBase {
       Consumer<Pose2d> resetSimulationPoseCallback) {
     this.gyroIO = gyroIO;
     this.resetSimulationPoseCallback = resetSimulationPoseCallback;
-    modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
-    modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
-    modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
-    modules[3] = new Module(brModuleIO, 3, TunerConstants.BackRight);
+    modules[0] = new Module(flModuleIO, 0, Drivebase2025.FrontLeft);
+    modules[1] = new Module(frModuleIO, 1, Drivebase2025.FrontRight);
+    modules[2] = new Module(blModuleIO, 2, Drivebase2025.BackLeft);
+    modules[3] = new Module(brModuleIO, 3, Drivebase2025.BackRight);
 
     // Usage reporting for swerve template
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -249,7 +250,7 @@ public class Drive extends SubsystemBase {
     // Calculate module setpoints
     ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, Drivebase2025.kSpeedAt12Volts);
 
     // Log unoptimized setpoints and setpoint speeds
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -372,7 +373,7 @@ public class Drive extends SubsystemBase {
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
-    return TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    return Drivebase2025.kSpeedAt12Volts.in(MetersPerSecond);
   }
 
   /** Returns the maximum angular speed in radians per sec. */
@@ -383,10 +384,10 @@ public class Drive extends SubsystemBase {
   /** Returns an array of module translations. */
   public static Translation2d[] getModuleTranslations() {
     return new Translation2d[] {
-      new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-      new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
-      new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-      new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+      new Translation2d(Drivebase2025.FrontLeft.LocationX, Drivebase2025.FrontLeft.LocationY),
+      new Translation2d(Drivebase2025.FrontRight.LocationX, Drivebase2025.FrontRight.LocationY),
+      new Translation2d(Drivebase2025.BackLeft.LocationX, Drivebase2025.BackLeft.LocationY),
+      new Translation2d(Drivebase2025.BackRight.LocationX, Drivebase2025.BackRight.LocationY)
     };
   }
 }

@@ -81,7 +81,9 @@ public class Drivebase2025 {
 
   // CAN bus that the devices are located on;
   // All swerve devices must share the same CAN bus
-  public static final CANBus kCANBus = new CANBus("Default Name", "./logs/example.hoot");
+  // NOTE: generator emits a placeholder name ("Default Name") plus a nonexistent hoot file.
+  // Use the system default bus instead, matching how the devices are constructed (empty name).
+  public static final CANBus kCANBus = new CANBus("");
 
   // Measured robot speed (m/s) at 12 V applied output;
   // This is NOT the desired max robot speed - see MaxSpeed in RobotContainer instead;

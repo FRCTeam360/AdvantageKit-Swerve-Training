@@ -16,7 +16,8 @@ public class VisionIOQuestNav implements VisionIO {
 
   public VisionIOQuestNav() {}
 
-  // Tell quest where it is (pass robot pose)
+  // Tell the quest where it is. Pass the ROBOT pose; the headset offset (robotToQuest)
+  // is applied here. With the current identity placeholder, the quest pose equals the robot pose.
   public void setPose(Pose3d pose) {
     questNav.setPose(pose.transformBy(robotToQuest));
   }

@@ -93,21 +93,29 @@ public class Vision extends SubsystemBase {
       // Loop over pose observations
       for (var observation : inputs[cameraIndex].poseObservations) {
         // Check whether to reject pose
-        boolean rejectPose =
-            (observation.type() == PoseObservationType.QUESTNAV
-                    ? false
-                    : // Skip tag checks for questnav
-                    (observation.tagCount() == 0 // Must have at least one tag
-                        || (observation.tagCount() == 1
-                            && observation.ambiguity() > maxAmbiguity))) // Cannot be high ambiguity
-                || Math.abs(observation.pose().getZ())
-                    > maxZError // Must have realistic Z coordinate
-
-                // Must be within the field boundaries
-                || observation.pose().getX() < 0.0
-                || observation.pose().getX() > aprilTagLayout.getFieldLength()
-                || observation.pose().getY() < 0.0
-                || observation.pose().getY() > aprilTagLayout.getFieldWidth();
+        boolean rejectPose;
+        if (observation.type() == PoseObservationType.QUESTNAV) {
+          // QuestNav gives a field-relative pose directly, so tag checks don't apply. The Z
+          // coordinate is the headset's mount height, which is unknown, so the realistic-Z check
+          // doesn't apply either. Only the field-boundary check is kept.
+          rejectPose =
+              observation.pose().getX() < 0.0
+              || observation.pose().getX() > aprilTagLayout.getFieldLength()
+              || observation.pose().getY() < 0.0
+              || observation.pose().getY() > aprilTagLayout.getFieldWidth();
+        } else {
+          // Must have at least one tag, or have low ambiguity
+          rejectPose =
+              observation.tagCount() == 0
+                  || (observation.tagCount() == 1
+                      && observation.ambiguity() > maxAmbiguity)
+              || Math.abs(observation.pose().getZ()) > maxZError // Must have realistic Z coordinate
+              // Must be within the field boundaries
+              || observation.pose().getX() < 0.0
+              || observation.pose().getX() > aprilTagLayout.getFieldLength()
+              || observation.pose().getY() < 0.0
+              || observation.pose().getY() > aprilTagLayout.getFieldWidth();
+        }
 
         // Add pose to log
         robotPoses.add(observation.pose());

@@ -25,7 +25,11 @@ public class VisionConstants {
   public static final Transform3d robotToCamera0 =
       new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
 
-  // TODO: Update with actual mount point
+  // WARNING: Placeholder. This is the transform from the robot to the Quest headset, expressed in
+  // the robot's frame. Set this to the actual headset mount once it is mounted. The Quest pose is
+  // computed as robotPose.transformBy(robotToQuest), so a wrong or stale value here gives the
+  // estimator a wrong robot pose. Currently identity (headset assumed co-located with robot
+  // center).
   public static final Transform3d robotToQuest =
       new Transform3d(0.0, 0.0, 0.0, new Rotation3d(0.0, 0.0, 0.0));
 
