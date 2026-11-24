@@ -237,7 +237,7 @@ public class Drive extends SubsystemBase {
     }
 
     // Update gyro alert
-    gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != RobotType.SIM);
+    gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentType != RobotType.SIM);
   }
 
   /**

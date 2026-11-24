@@ -13,12 +13,12 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
+ * on a roboRIO. Change the value of "simType" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
-  public static final RobotType simMode = RobotType.SIM;
-  public static final RobotType currentMode = RobotBase.isReal() ? getRobotType() : RobotType.SIM;
+  public static final RobotType simType = RobotType.SIM;
+  public static final RobotType currentType = RobotBase.isReal() ? getRobotType() : simType;
 
   public static final class SerialAddressConstants {
     public static final String DRIVEBASE2025_SERIAL_ADDRESS = "03126d42";
@@ -50,9 +50,6 @@ public final class Constants {
   static RobotType robotType;
 
   public static enum RobotType {
-    /** Running on a real robot. */
-    REAL,
-
     COMPBOT_2026,
 
     COMPBOT_2025,
