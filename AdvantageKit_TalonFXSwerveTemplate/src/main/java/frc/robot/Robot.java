@@ -41,11 +41,11 @@ public class Robot extends LoggedRobot {
           default -> "Unknown";
         });
 
+    Logger.recordMetadata("RobotType", Constants.robotType.toString());
+
     // Set up data receivers & replay source
-    switch (Constants.currentType) {
-      case COMPBOT_2026:
-      case COMPBOT_2025:
-      case COMPBOT_2024:
+    switch (Constants.currentMode) {
+      case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());

@@ -8,10 +8,10 @@
 package frc.robot.subsystems.drive;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.generated.TunerConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -37,8 +37,17 @@ public class PhoenixOdometryThread extends Thread {
   private final List<Queue<Double>> genericQueues = new ArrayList<>();
   private final List<Queue<Double>> timestampQueues = new ArrayList<>();
 
-  private static boolean isCANFD = TunerConstants.kCANBus.isNetworkFD();
+  // Set by start(), before the thread begins running
+  private double odometryFrequency = 100.0;
+  private boolean isCANFD = false;
+
   private static PhoenixOdometryThread instance = null;
+
+  /** Returns the odometry sample rate in Hz for devices on the given CAN bus. */
+  public static double frequencyFor(CANBus canBus) {
+    // CAN FD buses can support a higher rate
+    return canBus.isNetworkFD() ? 250.0 : 100.0;
+  }
 
   public static PhoenixOdometryThread getInstance() {
     if (instance == null) {
@@ -52,8 +61,15 @@ public class PhoenixOdometryThread extends Thread {
     setDaemon(true);
   }
 
-  @Override
-  public void start() {
+  /**
+   * Starts the thread if any signals were registered.
+   *
+   * @param odometryFrequency Sample rate in Hz
+   * @param isCANFD Whether the Phoenix signals are on a CAN FD bus
+   */
+  public void start(double odometryFrequency, boolean isCANFD) {
+    this.odometryFrequency = odometryFrequency;
+    this.isCANFD = isCANFD;
     if (timestampQueues.size() > 0) {
       super.start();
     }
@@ -111,12 +127,12 @@ public class PhoenixOdometryThread extends Thread {
       signalsLock.lock();
       try {
         if (isCANFD && phoenixSignals.length > 0) {
-          BaseStatusSignal.waitForAll(2.0 / Drive.ODOMETRY_FREQUENCY, phoenixSignals);
+          BaseStatusSignal.waitForAll(2.0 / odometryFrequency, phoenixSignals);
         } else {
           // "waitForAll" does not support blocking on multiple signals with a bus
           // that is not CAN FD, regardless of Pro licensing. No reasoning for this
           // behavior is provided by the documentation.
-          Thread.sleep((long) (1000.0 / Drive.ODOMETRY_FREQUENCY));
+          Thread.sleep((long) (1000.0 / odometryFrequency));
           if (phoenixSignals.length > 0) BaseStatusSignal.refreshAll(phoenixSignals);
         }
       } catch (InterruptedException e) {

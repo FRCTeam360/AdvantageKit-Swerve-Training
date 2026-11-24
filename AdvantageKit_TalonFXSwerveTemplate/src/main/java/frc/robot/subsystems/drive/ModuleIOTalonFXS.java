@@ -10,6 +10,7 @@ package frc.robot.subsystems.drive;
 import static frc.robot.util.PhoenixUtil.*;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANdiConfiguration;
 import com.ctre.phoenix6.configs.TalonFXSConfiguration;
@@ -32,7 +33,6 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
-import frc.robot.generated.TunerConstants;
 import java.util.Queue;
 
 /**
@@ -80,10 +80,11 @@ public class ModuleIOTalonFXS implements ModuleIO {
 
   public ModuleIOTalonFXS(
       SwerveModuleConstants<TalonFXSConfiguration, TalonFXSConfiguration, CANdiConfiguration>
-          constants) {
-    driveTalon = new TalonFXS(constants.DriveMotorId, TunerConstants.kCANBus);
-    turnTalon = new TalonFXS(constants.SteerMotorId, TunerConstants.kCANBus);
-    candi = new CANdi(constants.EncoderId, TunerConstants.kCANBus);
+          constants,
+      CANBus canBus) {
+    driveTalon = new TalonFXS(constants.DriveMotorId, canBus);
+    turnTalon = new TalonFXS(constants.SteerMotorId, canBus);
+    candi = new CANdi(constants.EncoderId, canBus);
 
     // Configure drive motor
     var driveConfig = constants.DriveMotorInitialConfigs;
@@ -174,7 +175,7 @@ public class ModuleIOTalonFXS implements ModuleIO {
 
     // Configure periodic frames
     BaseStatusSignal.setUpdateFrequencyForAll(
-        Drive.ODOMETRY_FREQUENCY, drivePosition, turnPosition);
+        PhoenixOdometryThread.frequencyFor(canBus), drivePosition, turnPosition);
     BaseStatusSignal.setUpdateFrequencyForAll(
         50.0,
         driveVelocity,

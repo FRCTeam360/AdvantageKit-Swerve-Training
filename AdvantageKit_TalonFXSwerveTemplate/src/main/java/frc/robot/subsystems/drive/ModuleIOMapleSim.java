@@ -15,10 +15,12 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import frc.robot.generated.TunerConstants;
 import frc.robot.util.PhoenixUtil;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
@@ -47,12 +49,15 @@ public class ModuleIOMapleSim implements ModuleIO {
   private double driveAppliedVolts = 0.0;
   private double turnAppliedVolts = 0.0;
 
-  public ModuleIOMapleSim(SwerveModuleSimulation moduleSimulation) {
+  public ModuleIOMapleSim(
+      SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
+          constants,
+      SwerveModuleSimulation moduleSimulation) {
     this.moduleSimulation = moduleSimulation;
     this.driveMotor =
         moduleSimulation
             .useGenericMotorControllerForDrive()
-            .withCurrentLimit(Amps.of(TunerConstants.FrontLeft.SlipCurrent));
+            .withCurrentLimit(Amps.of(constants.SlipCurrent));
     this.turnMotor = moduleSimulation.useGenericControllerForSteer().withCurrentLimit(Amps.of(20));
 
     this.driveController = new PIDController(0.05, 0.0, 0.0);
