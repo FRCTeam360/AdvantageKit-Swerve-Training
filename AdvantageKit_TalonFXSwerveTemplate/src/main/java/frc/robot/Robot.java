@@ -41,6 +41,8 @@ public class Robot extends LoggedRobot {
           default -> "Unknown";
         });
 
+    Logger.recordMetadata("RobotType", Constants.robotType.toString());
+
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
       case REAL:

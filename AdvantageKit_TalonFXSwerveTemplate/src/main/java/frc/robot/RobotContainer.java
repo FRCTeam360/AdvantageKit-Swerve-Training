@@ -10,6 +10,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,12 +19,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Launcher.Flywheel;
 import frc.robot.subsystems.Launcher.FlywheelIOSim;
 import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
 import frc.robot.subsystems.Roller;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.DriveConfig;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
@@ -65,19 +66,39 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Robot type: the only place that decides which robot's configuration is used. Everything
+    // below receives its configuration through its constructor.
+    final DriveConfig driveConfig;
+    switch (Constants.robotType) {
+      case COMPBOT_2025:
+        driveConfig = DriveConfig.compbot2025();
+        break;
+
+      case COMPBOT_2024:
+      case COMPBOT_2026:
+      default:
+        // TODO: These robots have no Tuner X file of their own yet
+        DriverStation.reportWarning(
+            "No drive config for " + Constants.robotType + ", using the template example values",
+            false);
+        driveConfig = DriveConfig.templateExample();
+        break;
+    }
+
+    // Mode: decides which IO implementations are created
     switch (Constants.currentMode) {
       case REAL:
-
         // Real robot, instantiate hardware IO implementations
         // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
         // a CANcoder
         drive =
             new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight),
+                driveConfig,
+                new GyroIOPigeon2(driveConfig.drivetrainConstants(), driveConfig.canBus()),
+                new ModuleIOTalonFX(driveConfig.frontLeft(), driveConfig.canBus()),
+                new ModuleIOTalonFX(driveConfig.frontRight(), driveConfig.canBus()),
+                new ModuleIOTalonFX(driveConfig.backLeft(), driveConfig.canBus()),
+                new ModuleIOTalonFX(driveConfig.backRight(), driveConfig.canBus()),
                 (robotPose) -> {});
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
@@ -92,11 +113,11 @@ public class RobotContainer {
         //
         // drive =
         // new Drive(
-        // new GyroIOPigeon2(),
-        // new ModuleIOTalonFXS(TunerConstants.FrontLeft),
-        // new ModuleIOTalonFXS(TunerConstants.FrontRight),
-        // new ModuleIOTalonFXS(TunerConstants.BackLeft),
-        // new ModuleIOTalonFXS(TunerConstants.BackRight));
+        // new GyroIOPigeon2(driveConfig.drivetrainConstants(), driveConfig.canBus()),
+        // new ModuleIOTalonFXS(TunerConstants.FrontLeft, driveConfig.canBus()),
+        // new ModuleIOTalonFXS(TunerConstants.FrontRight, driveConfig.canBus()),
+        // new ModuleIOTalonFXS(TunerConstants.BackLeft, driveConfig.canBus()),
+        // new ModuleIOTalonFXS(TunerConstants.BackRight, driveConfig.canBus()));
 
         vision =
             new Vision(
@@ -109,15 +130,17 @@ public class RobotContainer {
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
         // maple-sim simulates the chassis, so the modules and gyro read from that simulation
-        driveSimulation = new SwerveDriveSimulation(Drive.getMapleSimConfig(), SIM_START_POSE);
+        driveSimulation =
+            new SwerveDriveSimulation(Drive.getMapleSimConfig(driveConfig), SIM_START_POSE);
         SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
         drive =
             new Drive(
+                driveConfig,
                 new GyroIOSim(driveSimulation.getGyroSimulation()),
-                new ModuleIOMapleSim(driveSimulation.getModules()[0]),
-                new ModuleIOMapleSim(driveSimulation.getModules()[1]),
-                new ModuleIOMapleSim(driveSimulation.getModules()[2]),
-                new ModuleIOMapleSim(driveSimulation.getModules()[3]),
+                new ModuleIOMapleSim(driveConfig.frontLeft(), driveSimulation.getModules()[0]),
+                new ModuleIOMapleSim(driveConfig.frontRight(), driveSimulation.getModules()[1]),
+                new ModuleIOMapleSim(driveConfig.backLeft(), driveSimulation.getModules()[2]),
+                new ModuleIOMapleSim(driveConfig.backRight(), driveSimulation.getModules()[3]),
                 driveSimulation::setSimulationWorldPose);
 
         vision =
@@ -133,6 +156,7 @@ public class RobotContainer {
 
         drive =
             new Drive(
+                driveConfig,
                 new GyroIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {},
