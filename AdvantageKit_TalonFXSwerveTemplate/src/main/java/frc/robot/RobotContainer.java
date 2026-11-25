@@ -15,14 +15,15 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.mechanism.MechanismConfig;
+import frc.lib.mechanism.MotorIO;
+import frc.lib.mechanism.MotorIOTalonFX;
+import frc.lib.mechanism.MotorIOTalonFXSim;
 import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.Launcher.Flywheel;
-import frc.robot.subsystems.Launcher.FlywheelIOSim;
-import frc.robot.subsystems.Launcher.FlywheelIOTalonFX;
-import frc.robot.subsystems.Roller;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.ArmConfigs;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConfig;
 import frc.robot.subsystems.drive.GyroIO;
@@ -31,6 +32,10 @@ import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOMapleSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeConfigs;
+import frc.robot.subsystems.launcher.Flywheel;
+import frc.robot.subsystems.launcher.FlywheelConfigs;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
@@ -52,6 +57,8 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
 
+  private final Intake intake;
+  private final Arm arm;
   private final Flywheel flywheel;
 
   // Controller
@@ -69,9 +76,23 @@ public class RobotContainer {
     // Robot type: the only place that decides which robot's configuration is used. Everything
     // below receives its configuration through its constructor.
     final DriveConfig driveConfig;
+    final MechanismConfig intakeConfig;
+    final MechanismConfig armConfig;
+    final MechanismConfig flywheelConfig;
     switch (Constants.robotType) {
+      case WOODBOT_2027:
+        // TODO: generate the woodbot's Tuner X file
+        driveConfig = DriveConfig.templateExample();
+        intakeConfig = IntakeConfigs.woodbot2027();
+        armConfig = ArmConfigs.woodbot2027();
+        flywheelConfig = FlywheelConfigs.woodbot2027();
+        break;
+
       case COMPBOT_2025:
         driveConfig = DriveConfig.compbot2025();
+        intakeConfig = IntakeConfigs.trainingBot();
+        armConfig = ArmConfigs.woodbot2027().asNotInstalled();
+        flywheelConfig = FlywheelConfigs.trainingBot();
         break;
 
       case COMPBOT_2024:
@@ -82,6 +103,9 @@ public class RobotContainer {
             "No drive config for " + Constants.robotType + ", using the template example values",
             false);
         driveConfig = DriveConfig.templateExample();
+        intakeConfig = IntakeConfigs.trainingBot();
+        armConfig = ArmConfigs.woodbot2027().asNotInstalled();
+        flywheelConfig = FlywheelConfigs.trainingBot();
         break;
     }
 
@@ -124,7 +148,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
 
-        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
 
       case SIM:
@@ -148,7 +171,6 @@ public class RobotContainer {
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
                     VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
-        flywheel = new Flywheel(new FlywheelIOSim());
         break;
 
       default:
@@ -165,9 +187,18 @@ public class RobotContainer {
                 (robotPose) -> {});
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
-        flywheel = new Flywheel(new FlywheelIOTalonFX());
         break;
     }
+
+    // Mechanisms: the IO for each comes from its config and the mode (see motorIO below)
+    intake = new Intake(intakeConfig, motorIO(intakeConfig));
+    arm = new Arm(armConfig, motorIO(armConfig));
+    flywheel = new Flywheel(flywheelConfig, motorIO(flywheelConfig));
+
+    // PathPlanner named commands, e.g. "Arm SCORE and wait". Must come before building autos.
+    intake.registerNamedCommands();
+    arm.registerNamedCommands();
+    flywheel.registerNamedCommands();
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -193,13 +224,28 @@ public class RobotContainer {
   }
 
   /**
+   * Picks the IO for a mechanism: real TalonFXs on the robot, simulated TalonFXs in sim, and an IO
+   * that does nothing for log replay or for a mechanism this robot doesn't have.
+   */
+  private static MotorIO motorIO(MechanismConfig config) {
+    if (!config.installed) return new MotorIO() {};
+    switch (Constants.currentMode) {
+      case REAL:
+        return new MotorIOTalonFX(config);
+      case SIM:
+        return new MotorIOTalonFXSim(config);
+      default:
+        return new MotorIO() {};
+    }
+  }
+
+  /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    Roller roller = new Roller();
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -231,11 +277,16 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    // does the roller roll and the roll of the and roller the rolling
-    controller.y().onTrue(new InstantCommand(() -> roller.setDutyCycle(1.0)));
-    controller.y().onFalse(new InstantCommand(() -> roller.stop()));
-
-    controller.leftBumper().whileTrue(flywheel.setDutyCycleCommand(() -> 1.0));
+    // Mechanisms
+    controller.rightTrigger().whileTrue(intake.runGoal(Intake.Goal.INTAKE));
+    controller.leftTrigger().whileTrue(intake.runGoal(Intake.Goal.EJECT));
+    controller.leftBumper().whileTrue(flywheel.runGoal(Flywheel.Goal.SHOOT));
+    controller.povDown().onTrue(arm.setGoal(Arm.Goal.STOW));
+    controller.povLeft().onTrue(arm.setGoal(Arm.Goal.INTAKE));
+    controller.povUp().onTrue(arm.setGoal(Arm.Goal.SCORE));
+    controller.start().onTrue(arm.home());
+    // Bring-up: hold Y and use the right stick to drive the arm open loop (max 4 V)
+    controller.y().whileTrue(arm.runVoltage(() -> -controller.getRightY() * 4.0));
   }
 
   /**

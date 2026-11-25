@@ -33,7 +33,13 @@ public final class Constants {
    * Robot to simulate when not running on a roboRIO. For REPLAY, this must match the robot that
    * recorded the log.
    */
-  public static final RobotType simRobot = RobotType.COMPBOT_2025;
+  public static final RobotType simRobot = RobotType.WOODBOT_2027;
+
+  /**
+   * Allows LoggedTunableNumbers (mechanism goals and gains) to be changed from the dashboard under
+   * /Tuning. Turn off before events so dashboard edits can't change the robot.
+   */
+  public static final boolean tuningMode = true;
 
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
   public static final RobotType robotType = RobotBase.isReal() ? detectRobotType() : simRobot;
@@ -41,6 +47,7 @@ public final class Constants {
   public static final class SerialAddressConstants {
     public static final String DRIVEBASE2025_SERIAL_ADDRESS = "03126d42";
     public static final String DRIVEBASE2024_SERIAL_ADDRESS = "03064DB8";
+    // TODO: add the woodbot's roboRIO serial and a case in detectRobotType()
   }
 
   /** Identifies the physical robot from the roboRIO serial number. */
@@ -71,6 +78,7 @@ public final class Constants {
   }
 
   public static enum RobotType {
+    WOODBOT_2027,
     COMPBOT_2026,
     COMPBOT_2025,
     COMPBOT_2024
